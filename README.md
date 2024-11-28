@@ -1,6 +1,8 @@
 # Yahoo Fantasy Football Recap Generator
 
-🏈 **Yahoo Fantasy Weekly Recap** is a serverless app that generates fun, detailed recaps for Yahoo Fantasy Football leagues. It pulls weekly matchup data, processes it with OpenAI's GPT-4, and highlights the best and worst performances of the week.
+🎮 [Try it here!](https://fantasy-recap.netlify.app) 
+
+🏈 **Yahoo Fantasy Weekly Recap** 🏈 is a webapp that generates fun, detailed recaps for Yahoo Fantasy Football leagues. It pulls weekly matchup data, processes it with OpenAI's GPT-4, and highlights the best and worst performances of the week.
 
 ## Features
 
@@ -20,13 +22,9 @@
 - **Frontend**: Vanilla JS, HTML, CSS
 - **API Integrations**: Yahoo Fantasy Sports, OpenAI GPT-4
 
-## Live Demo
-
-🎮 [Try it here!](https://fantasy-recap.netlify.app) 
-
 ## Screenshot
 
-[Screenshot](https://i.imgur.com/Pqr2gL5.png)
+![Screenshot](https://i.imgur.com/Pqr2gL5.png)
 
 ## License
 
