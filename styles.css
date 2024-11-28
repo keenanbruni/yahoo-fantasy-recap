@@ -1,0 +1,167 @@
+/* Reset and global styles */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+/* Container for the main content */
+.container {
+    width: 90%;
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden; /* Ensure content doesn't overflow the container */
+}
+
+/* Auth section */
+.auth-section {
+    display: block; /* Stack elements vertically */
+    text-align: center; /* Center-align button and message */
+    margin-bottom: 20px;
+}
+
+#authStatusContainer {
+    margin-top: 10px; /* Add spacing between the button and the status message */
+}
+
+/* Spacing and styling for the disabled class */
+.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Header styling */
+h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+/* Form styling */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+/* Label styling */
+label {
+    font-weight: bold;
+    color: #555;
+}
+
+/* Input and select styling */
+input, select {
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: calc(100% - 22px); /* Adjust width to account for padding and border */
+    box-sizing: border-box; /* Include padding and border in the total width */
+}
+
+/* General button styling */
+button {
+    padding: 10px;
+    font-size: 16px;
+    background-color: #0077cc;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    width: 100%;
+    margin-top: 10px;
+}
+
+/* Hover and active states for buttons */
+button:hover {
+    background-color: #005fa3;
+}
+
+button:active {
+    transform: scale(0.98);
+}
+
+.footer {
+    color: grey;
+    font-size: 0.8em; /* Adjusts the text size */
+    text-align: center;
+    margin-top: 20px;
+    clear: both; /* Ensures the footer doesn't float next to other elements */
+}
+
+
+/* Fade-out animation */
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes fadeInOut {
+    0% { opacity: 0; }
+    50% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+#authStatus.fade-out {
+    animation: fadeOut 2s forwards;
+}
+
+/* Styling for the loading indicator */
+#loading {
+    text-align: center;
+    font-size: 16px;
+    font-weight: bold;
+    color: #555;
+    margin-top: 20px;
+}
+
+#loading.fade-in-out {
+    animation: fadeInOut 2s infinite;
+}
+
+/* Summary output styling */
+#summaryOutput {
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+#summaryText {
+    font-size: 14px;
+    color: #333;
+}
+
+/* Responsive styling for smaller screens */
+@media (max-width: 600px) {
+    .container {
+        padding: 15px;
+    }
+
+    button {
+        padding: 12px;
+        font-size: 14px;
+    }
+
+    input, select {
+        font-size: 14px;
+        padding: 8px;
+    }
+}

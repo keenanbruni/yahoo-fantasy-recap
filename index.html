@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yahoo Fantasy Football Recap Generator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🏈 Yahoo Fantasy Weekly Recap 🏈</h1>
+
+        <div class="auth-section">
+            <button id="authButton">Authenticate with Yahoo</button>
+            <div id="authStatusContainer">
+                <p id="authStatus" style="display: none; margin-top: 10px;">Authenticated successfully!</p>
+            </div>
+        </div>    
+
+        <!-- Form to input week number, select league, and specify mood -->
+        <form id="fetchMatchupForm">
+            <label for="weekInput">Week Number:</label>
+            <input type="number" id="weekInput" placeholder="Enter week number" required>
+
+            <label for="leagueIdSelect">League:</label>
+            <select id="leagueIdSelect" required>
+                <option value="" disabled selected>Select your league</option>
+            </select>
+
+            <!-- New Mood input field -->
+            <label for="moodInput">Theme:</label>
+            <input type="text" id="moodInput" placeholder="(e.g., animals, finance, medical)" required>
+
+            <button type="submit">Generate Recap</button>
+        </form>
+
+        <!-- Loading indicator -->
+        <div id="loading" style="display:none;">Loading, please wait...</div>
+
+        <!-- Displaying the generated summary -->
+        <div id="summaryOutput">
+            <p id="summaryText">Your recap summary will appear here. For best results, use this tool after Yahoo posts their weekly recap on Tuesday mornings.</p>
+        </div>
+
+        <!-- Moved footer inside the container and added a CSS class -->
+        <footer class="footer">
+            This app uses ChatGPT for summary generation.
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+{
+  "name": "yahoo-recap-nopy",
+  "version": "1.0.0",
+  "description": "Yahoo fantasy football weekly recap",
+  "main": "script.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/keenanbruni/yahoo-recap-nopy.git"
+  },
+  "author": "Keenan Bruni",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/keenanbruni/yahoo-recap-nopy/issues"
+  },
+  "homepage": "https://github.com/keenanbruni/yahoo-recap-nopy#readme",
+  "dependencies": {
+    "axios": "^1.7.7",
+    "cheerio": "^1.0.0",
+    "netlify-cli": "^17.36.0",
+    "xml2js": "^0.6.2"
+  }
+}
