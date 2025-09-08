@@ -101,6 +101,24 @@ button:active {
     clear: both; /* Ensures the footer doesn't float next to other elements */
 }
 
+.footer a {
+    color: #0077cc;
+    text-decoration: none;
+    font-weight: 500;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    display: inline-block;
+    margin-top: 5px;
+}
+
+.footer a:hover {
+    color: #005fa3;
+    background-color: rgba(0, 119, 204, 0.1);
+    transform: translateY(-1px);
+    text-decoration: underline;
+}
+
 
 /* Fade-out animation */
 @keyframes fadeOut {
