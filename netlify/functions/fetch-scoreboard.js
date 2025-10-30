@@ -19,6 +19,16 @@ exports.handler = async (event, context) => {
     // Construct the Yahoo Fantasy API endpoint to fetch the scoreboard with roster data
     const apiUrl = `https://fantasysports.yahooapis.com/fantasy/v2/league/${league_id}/scoreboard;week=${week}/matchups/teams/roster/players`;
 
+    // Helpers hoisted so both main try and refresh path can use them
+    const chunkArray = (array, size) => {
+        const results = [];
+        for (let i = 0; i < array.length; i += size) {
+            results.push(array.slice(i, i + size));
+        }
+        return results;
+    };
+    const chunkSize = 25; // Yahoo API allows up to 25 keys per request
+
     try {
         // Step 1: Fetch the league scoreboard with roster data
         const response = await axios.get(apiUrl, {
@@ -56,21 +66,13 @@ exports.handler = async (event, context) => {
             });
         });
 
-        // Step 3: Fetch player statistics using the player keys in batches
-        const chunkArray = (array, size) => {
-            const results = [];
-            for (let i = 0; i < array.length; i += size) {
-                results.push(array.slice(i, i + size));
-            }
-            return results;
-        };
-
-        const chunkSize = 25; // Adjust the chunk size as needed (Yahoo API allows up to 25)
+        // Step 3: Fetch player statistics using the player keys in batches (league-scoped to include player_points)
         const playerKeyChunks = chunkArray(playerKeys, chunkSize);
 
         const playerStatsPromises = playerKeyChunks.map(async (chunk) => {
             const playerKeysParam = chunk.join(',');
-            const playerStatsUrl = `https://fantasysports.yahooapis.com/fantasy/v2/players;player_keys=${playerKeysParam}/stats;type=week;week=${week}`;
+            // Use league-scoped players endpoint so Yahoo returns league-scored player_points
+            const playerStatsUrl = `https://fantasysports.yahooapis.com/fantasy/v2/league/${league_id}/players;player_keys=${playerKeysParam}/stats;type=week;week=${week}`;
             const playerStatsResponse = await axios.get(playerStatsUrl, {
                 headers: {
                     Authorization: `Bearer ${accessToken}`,
@@ -131,7 +133,7 @@ exports.handler = async (event, context) => {
                 const playerKeyChunks = chunkArray(playerKeys, chunkSize);
                 const playerStatsPromises = playerKeyChunks.map(async (chunk) => {
                     const playerKeysParam = chunk.join(',');
-                    const playerStatsUrl = `https://fantasysports.yahooapis.com/fantasy/v2/players;player_keys=${playerKeysParam}/stats;type=week;week=${week}`;
+                    const playerStatsUrl = `https://fantasysports.yahooapis.com/fantasy/v2/league/${league_id}/players;player_keys=${playerKeysParam}/stats;type=week;week=${week}`;
                     const playerStatsResponse = await axios.get(playerStatsUrl, {
                         headers: {
                             Authorization: `Bearer ${accessToken}`,
