@@ -108,30 +108,7 @@ function extractFantasyPoints(node) {
     return NaN;
 }
 
-// Helper: theme lexicon to enforce domain flavor
-function getThemeLexicon(rawMood) {
-    const mood = (rawMood || '').toLowerCase().trim();
-    const map = {
-        finance: {
-            terms: ['portfolio', 'ROI', 'dividends', 'liquidity', 'hedge', 'bullish', 'bearish', 'alpha', 'volatility', 'arbitrage'],
-            emojis: ['💹','📈','💸','🏦','📊']
-        },
-        medical: {
-            terms: ['diagnosis', 'prognosis', 'triage', 'vital signs', 'dosage', 'stabilize', 'clinical', 'acute', 'remission', 'rehab'],
-            emojis: ['🩺','💊','🧬','🏥','🧪']
-        },
-        tech: {
-            terms: ['throughput', 'latency', 'scaling', 'pipeline', 'optimize', 'debug', 'deploy', 'stack', 'refactor', 'benchmark'],
-            emojis: ['💻','⚙️','🚀','🧠','🧪']
-        },
-        pirate: {
-            terms: ['plunder', 'bounty', 'broadside', 'keelhaul', 'quartermaster', 'mutiny', 'regatta', 'treasure', 'corsair', 'buccaneer'],
-            emojis: ['🏴‍☠️','🦜','⚓','🗺️','💰']
-        }
-    };
-    const fallback = { terms: ['surge', 'execution', 'momentum', 'strategy', 'pressure'], emojis: ['🔥','🏆','⚡','🎯'] };
-    return map[mood] || fallback;
-}
+// Note: Known theme lexicons removed. The model is instructed to select fitting domain terms/emojis per matchup based on the provided mood.
 
 exports.handler = async (event) => {
     try {
@@ -346,13 +323,12 @@ exports.handler = async (event) => {
         // Prepare per-matchup prompts to keep tokens and latency low and theme-aware
         const compact = JSON.parse(summaryDetails);
         const weekNum = compact.W;
-        const perMatchupPrompt = (m) => {
+        // Per-matchup prompt with per-matchup style variation; no predefined theme lexicon
+        const perMatchupPrompt = (m, ctx) => {
+            const { mood: moodIn, styleHint = 'color commentary with one vivid metaphor' } = ctx || {};
             const tpA = (m.Ta || []).map(x => `${x.n} (${x.p} pts)`).join(', ');
             const tpB = (m.Tb || []).map(x => `${x.n} (${x.p} pts)`).join(', ');
-            const lex = getThemeLexicon(mood);
-            const termsList = (lex.terms || []).slice(0,6).join(', ');
-            const emojiList = (lex.emojis || []).join('');
-            return `Theme: ${mood}. League Week ${weekNum}. ${m.A} vs ${m.B}. Winner: ${m.W}. Score: ${m.Sa} - ${m.Sb}.\nTop performers ${m.A}: ${tpA || 'n/a'}. Top performers ${m.B}: ${tpB || 'n/a'}.\nUse at least 2 of these ${mood} terms: ${termsList}. Include at least 1 of these emojis: ${emojiList}.\nTask: Write 4 concise sentences in the ${mood} theme that mention 1-2 listed top performers BY NAME and POINTS (use the numbers exactly). Vary phrasing; avoid generic lines like 'edged', 'powered by', or 'momentum swung'. Do NOT output grades. Reply with ONLY the 4 sentences.`;
+            return `You are writing a fantasy football recap with a "${moodIn}" vibe. Week ${weekNum}. Matchup: ${m.A} vs ${m.B}. Winner: ${m.W}. Score: ${m.Sa}-${m.Sb}.\nTop performers ${m.A}: ${tpA || 'n/a'}. Top performers ${m.B}: ${tpB || 'n/a'}.\nStyle: ${styleHint}. Use vocabulary, tone, and metaphors that subtly reflect the "${moodIn}" theme WITHOUT explicitly mentioning the theme itself. Choose 1 fitting emoji. Avoid generic sports cliches.\nTask: Write 3–4 concise sentences that mention 1–2 listed top performers BY NAME and POINTS (use the numbers exactly). Vary sentence structures and vocabulary across matchups. Output plain text only (no markdown).`;
         };
 
         const callOpenAIChat = async (prompt, timeoutMs=6500) => {
@@ -395,26 +371,51 @@ exports.handler = async (event) => {
         if (process.env.NETLIFY_DEV === 'true') {
             logToFile({ message: 'Per-matchup generation starting', count: matchupsArrayForGen.length, timestamp: new Date().toISOString() });
         }
-        const lex = getThemeLexicon(mood);
-        const termA = lex.terms?.[0] || 'execution';
-        const termB = lex.terms?.[1] || 'strategy';
-        const emj = lex.emojis?.[0] || '🏆';
+        const styleHints = [
+            'color commentary with one vivid metaphor',
+            'analyst desk breakdown with a punchy lead',
+            'press-box recap focusing on momentum swings',
+            'rivalry angle with a playful jab',
+            'coaching/strategy lens highlighting adjustments',
+            'storyline arc from kickoff to clincher'
+        ];
+        const genericEmojis = ['🏆','🔥','⚡','🎯','🧠','🔧','📈','🛡️','🚀','🎭'];
+        const perMatchupCtx = matchupsArrayForGen.map((_, i) => {
+            const styleHint = styleHints[i % styleHints.length];
+            const emoji = genericEmojis[i % genericEmojis.length];
+            return { mood, styleHint, emoji };
+        });
         const fallbackTemplates = [
-            (m, aTop, bTop) => `${m.W} closed the book on ${m.A === m.W ? m.B : m.A} ${Math.max(m.Sa,m.Sb)}-${Math.min(m.Sa,m.Sb)} ${emj}. In ${mood} terms, ${m.W} showed ${termA} while ${m.A === m.W ? m.B : m.A} faced ${termB}. Standouts included ${aTop || bTop || 'key contributors'}. Both sides recalibrate for next week.`,
-            (m, aTop, bTop) => `${m.W} outperformed ${m.A === m.W ? m.B : m.A} ${Math.max(m.Sa,m.Sb)}-${Math.min(m.Sa,m.Sb)} ${emj}. Highlights: ${aTop || bTop || 'top efforts'}. With a ${mood} lens, ${m.W} optimized ${termA} while the opponent struggled with ${termB}. New opportunities await.`,
-            (m, aTop, bTop) => `${m.W} prevailed over ${m.A === m.W ? m.B : m.A} ${Math.max(m.Sa,m.Sb)}-${Math.min(m.Sa,m.Sb)} ${emj}. ${aTop || bTop || 'Key pieces'} set the tone. The ${mood} narrative favored ${m.W} in ${termA} while ${m.A === m.W ? m.B : m.A} lagged on ${termB}. Onward to next week.`,
+            (m, aTop, bTop, c) => {
+                const em = c?.emoji || '🏆';
+                return `${m.W} closed the book on ${m.A === m.W ? m.B : m.A} ${Math.max(m.Sa,m.Sb)}-${Math.min(m.Sa,m.Sb)} ${em}. Standouts: ${aTop || bTop || 'key contributors'}. With a ${mood} vibe, ${m.W} set the pace. Fresh chapter next week.`;
+            },
+            (m, aTop, bTop, c) => {
+                const em = c?.emoji || '🔥';
+                return `${m.W} outpaced ${m.A === m.W ? m.B : m.A} ${Math.max(m.Sa,m.Sb)}-${Math.min(m.Sa,m.Sb)} ${em}. ${aTop || bTop || 'Top efforts'} fueled the result. In a ${mood} frame, the edge was decisive. Eyes on the next slate.`;
+            },
+            (m, aTop, bTop, c) => {
+                const em = c?.emoji || '🚀';
+                return `${m.W} held off ${m.A === m.W ? m.B : m.A} ${Math.max(m.Sa,m.Sb)}-${Math.min(m.Sa,m.Sb)} ${em}. ${aTop || bTop || 'Key pieces'} tilted it late. Through a ${mood} lens, control never wavered. Onward.`;
+            },
         ];
 
         const perMatchupSummaries = await runWithConcurrency(3, matchupsArrayForGen, async (m, idx) => {
-            const prompt = perMatchupPrompt(m);
+            const ctx = perMatchupCtx[idx] || { mood };
+            const prompt = perMatchupPrompt(m, ctx);
             try {
-                return await callOpenAIChat(prompt);
-            } catch (e) {
+                const txt = await callOpenAIChat(prompt);
+                if (typeof txt === 'string' && txt.trim().length > 0) return txt.trim();
                 // Fallback: quick deterministic summary using given data
                 const aTop = (m.Ta && m.Ta[0]) ? `${m.Ta[0].n} (${m.Ta[0].p} pts)` : '';
                 const bTop = (m.Tb && m.Tb[0]) ? `${m.Tb[0].n} (${m.Tb[0].p} pts)` : '';
                 const t = fallbackTemplates[idx % fallbackTemplates.length];
-                return t(m, aTop, bTop);
+                return t(m, aTop, bTop, ctx);
+            } catch (e) {
+                const aTop = (m.Ta && m.Ta[0]) ? `${m.Ta[0].n} (${m.Ta[0].p} pts)` : '';
+                const bTop = (m.Tb && m.Tb[0]) ? `${m.Tb[0].n} (${m.Tb[0].p} pts)` : '';
+                const t = fallbackTemplates[idx % fallbackTemplates.length];
+                return t(m, aTop, bTop, ctx);
             }
         });
 
